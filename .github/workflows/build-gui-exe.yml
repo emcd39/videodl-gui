@@ -21,7 +21,7 @@ jobs:
         run: |
           git remote add upstream https://github.com/CharlesPikachu/videodl.git || true
           git fetch upstream
-          git rebase upstream/main              
+          git rebase upstream/master              
       
       - name: Set up Python
         uses: actions/setup-python@v5
