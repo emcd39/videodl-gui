@@ -495,7 +495,7 @@ class VideoDLGUI(QMainWindow):
                 self.log_message(f"开始下载第 {i+1} 个视频: {video_info.get('title', '未知标题')}")
                 
                 # 直接调用下载方法
-                self.video_client.download(video_infos=[video_info], output_dir=self.output_dir)
+                self.video_client.download(video_infos=[video_info], outputdir=self.output_dir)
                 
                 self.log_message(f"✓ 第 {i+1} 个视频下载完成")
             
