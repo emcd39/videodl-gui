@@ -16,12 +16,20 @@ jobs:
         with:
           fetch-depth: 0
       
-      - name: Sync from upstream
+      - name: Copy upstream code (without modifying git history)
         shell: bash
         run: |
-          git remote add upstream https://github.com/CharlesPikachu/videodl.git || true
-          git fetch upstream
-          git rebase upstream/master              
+          # Create a temporary directory for upstream code
+          mkdir -p temp_upstream
+          # Clone upstream repository to temporary directory
+          git clone --depth 1 https://github.com/CharlesPikachu/videodl.git temp_upstream
+          # Copy upstream files to current directory, excluding .git and other unnecessary files
+          cp -r temp_upstream/* . 2>/dev/null || true
+          cp -r temp_upstream/.* . 2>/dev/null || true
+          # Remove temporary directory
+          rm -rf temp_upstream
+          # Remove any .git directories that might have been copied
+          find . -name ".git" -type d -exec rm -rf {} \; 2>/dev/null || true              
       
       - name: Set up Python
         uses: actions/setup-python@v5
