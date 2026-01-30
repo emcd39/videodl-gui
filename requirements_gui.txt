@@ -1,0 +1,4 @@
+# VideoDL GUI Requirements
+# Install with: pip install -r requirements_gui.txt
+
+PyQt6>=6.4.0
