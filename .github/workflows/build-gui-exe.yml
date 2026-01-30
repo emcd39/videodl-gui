@@ -1,0 +1,224 @@
+name: Build and Release GUI EXE
+
+on:
+  schedule:
+    # 北京时间每天 00:00 (UTC 时间 16:00)
+    - cron: "0 16 * * *"
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest  # 使用 Windows 环境打包 Windows exe
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Sync from upstream
+        shell: bash
+        run: |
+          git remote add upstream https://github.com/CharlesPikachu/videodl.git || true
+          git fetch upstream
+          git rebase upstream/main              
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      
+      - name: Install PyInstaller
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+      
+      - name: Install videodl dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements_gui.txt
+          pip install -e .
+      
+      - name: Verify videodl installation
+        run: |
+          python -c "import videodl; print(f'videodl version: {videodl.__version__}')"
+          videodl --help
+      
+      - name: Build EXE with PyInstaller
+        run: |
+          pyinstaller --clean videodl_gui.spec
+      
+      - name: Verify EXE was created
+        run: |
+          if (Test-Path "dist\VideoDL_GUI.exe") {
+            Write-Host "EXE file created successfully"
+            Get-Item "dist\VideoDL_GUI.exe" | Select-Object Name, Length, LastWriteTime
+          } else {
+            Write-Error "EXE file not found!"
+            exit 1
+          }
+      
+      - name: Create release info
+        id: release_info
+        run: |
+          $version = python -c "import videodl; print(videodl.__version__)"
+          $date = Get-Date -Format "yyyy-MM-dd"
+          $tag = "v$version-gui-$date"
+          $releaseName = "VideoDL GUI v$version ($date)"
+          
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+          echo "tag=$tag" >> $env:GITHUB_OUTPUT
+          echo "releaseName=$releaseName" >> $env:GITHUB_OUTPUT
+        shell: pwsh
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.release_info.outputs.tag }}
+          name: ${{ steps.release_info.outputs.releaseName }}
+          body: |
+            ## VideoDL GUI 自动构建
+            
+            ### 📦 构建信息
+            - **版本**: ${{ steps.release_info.outputs.version }}
+            - **构建日期**: ${{ github.event.head_commit.timestamp }}
+            - **Python 版本**: 3.13
+            - **PyInstaller 版本**: 6.18.0
+            
+            ### 🚀 使用方法
+            1. 下载 `VideoDL_GUI.exe` 文件
+            2. 双击运行即可（无需安装 Python）
+            3. 首次运行可能需要点击"更多信息" → "仍要运行"
+            
+            ### 📋 功能特性
+            - 支持 60+ 视频平台解析
+            - CLI 子进程下载，显示实时进度
+            - 自定义下载目录
+            - 全中文界面
+            - 轻松取消下载（关闭 CLI 窗口）
+            
+            ### ⚠️ 注意事项
+            - 文件大小约 93 MB（包含所有依赖）
+            - 需要 Windows 7 或更高版本
+            - 首次运行可能被杀毒软件误报（正常现象）
+            
+            ### � 外部工具依赖
+            
+            **重要说明**：本 exe 文件本身不包含以下工具，但根据使用场景可能需要：
+            
+            #### ✅ 基本使用（无需额外工具）
+            以下平台**完全不需要**安装任何额外工具：
+            - 🅱️ 哔哩哔哩 (Bilibili)
+            - 🎵 抖音 (Douyin)
+            - 📱 快手 (Kuaishou)
+            - 📕 小红书 (Rednote)
+            - 🐦 微博 (Weibo)
+            - 以及大多数其他平台...
+            
+            #### 📦 可选工具（根据需要安装）
+            
+            **1. FFmpeg**（推荐安装）
+            
+            **何时需要**：
+            - 下载 HLS/m3u8 流媒体（某些平台的视频）
+            - 合并视频和音频流
+            - 转换视频格式
+            
+            **影响**：
+            - ❌ 无法下载某些平台的 HLS 流
+            - ❌ 无法下载需要合并的视频
+            - ✅ 大部分平台（B站、抖音、快手等）不受影响
+            
+            **安装方法**：
+            ```bash
+            # Windows 用户
+            1. 下载：https://ffmpeg.org/download.html
+            2. 解压到某个目录（如 C:\ffmpeg）
+            3. 将 C:\ffmpeg\bin 添加到系统 PATH
+            4. 验证：ffmpeg -version
+            ```
+            
+            **2. N_m3u8DL-RE**（可选，增强版 FFmpeg）
+            
+            **何时需要**：
+            - 下载加密的 m3u8 流
+            - 下载受保护的 HLS 视频
+            - 需要更快的下载速度（并行下载）
+            
+            **影响**：
+            - ❌ 无法下载某些加密视频
+            - ✅ 可以用 FFmpeg 替代（功能较弱）
+            - ✅ 大部分视频不受影响
+            
+            **安装方法**：
+            ```bash
+            # Windows 用户
+            1. 下载：https://github.com/nilaoda/N_m3u8DL-RE/releases
+            2. 解压到某个目录
+            3. 将目录添加到系统 PATH
+            4. 验证：N_m3u8DL-RE --version
+            ```
+            
+            **3. Node.js**（仅特定平台）
+            
+            **何时需要**：
+            - 下载 YouTube 视频
+            - 下载 CCTV 视频
+            - 下载腾讯视频
+            
+            **影响**：
+            - ❌ 这三个平台无法下载
+            - ✅ 其他所有平台（B站、抖音、快手等）正常
+            
+            **安装方法**：
+            ```bash
+            # Windows 用户
+            1. 下载：https://nodejs.org/
+            2. 安装（会自动添加到 PATH）
+            3. 验证：node -v
+            ```
+            
+            #### 📊 使用场景快速参考
+            
+            | 使用场景 | 是否需要 FFmpeg | 是否需要 N_m3u8DL-RE | 是否需要 Node.js |
+            |---------|----------------|---------------------|----------------|
+            | B站、抖音、快手、小红书等 | ❌ 不需要 | ❌ 不需要 | ❌ 不需要 |
+            | YouTube | ⚠️ 可选 | ⚠️ 可选 | ✅ **需要** |
+            | CCTV 视频 | ✅ **需要** | ⚠️ 可选 | ✅ **需要** |
+            | 腾讯视频 | ⚠️ 可选 | ⚠️ 可选 | ✅ **需要** |
+            | 加密 m3u8 视频 | ✅ **需要** | ✅ **推荐** | ❌ 不需要 |
+            | 普通 MP4 视频 | ❌ 不需要 | ❌ 不需要 | ❌ 不需要 |
+            
+            ### �📞 技术支持
+            - GitHub: https://github.com/CharlesPikachu/videodl
+            - 问题反馈: https://github.com/CharlesPikachu/videodl/issues
+            
+            ---
+            *此版本由 GitHub Actions 自动构建*
+          files: |
+            dist/VideoDL_GUI.exe
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: VideoDL-GUI-EXE
+          path: dist/VideoDL_GUI.exe
+          retention-days: 30
+      
+      - name: Build summary
+        run: |
+          echo "## ✅ 构建成功" >> $env:GITHUB_STEP_SUMMARY
+          echo "" >> $env:GITHUB_STEP_SUMMARY
+          echo "- **版本**: ${{ steps.release_info.outputs.version }}" >> $env:GITHUB_STEP_SUMMARY
+          echo "- **EXE 文件**: dist/VideoDL_GUI.exe" >> $env:GITHUB_STEP_SUMMARY
+          echo "- **发布标签**: ${{ steps.release_info.outputs.tag }}" >> $env:GITHUB_STEP_SUMMARY
+          echo "- **发布名称**: ${{ steps.release_info.outputs.releaseName }}" >> $env:GITHUB_STEP_SUMMARY
+          echo "" >> $env:GITHUB_STEP_SUMMARY
+          echo "### 📦 下载链接" >> $env:GITHUB_STEP_SUMMARY
+          echo "请查看 [Releases](https://github.com/CharlesPikachu/videodl/releases) 页面下载最新版本。" >> $env:GITHUB_STEP_SUMMARY
+        shell: pwsh
