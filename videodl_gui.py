@@ -467,7 +467,7 @@ class VideoDLGUI(QMainWindow):
         QMessageBox.critical(self, "错误", f"解析链接失败: {error_message}")
         
     def download_videos(self):
-        """下载解析的视频 - 使用 CLI 子进程"""
+        """下载解析的视频 - 使用 Python 模块直接调用"""
         if not self.current_video_infos:
             return
         
@@ -479,72 +479,39 @@ class VideoDLGUI(QMainWindow):
         # 确保输出目录存在
         os.makedirs(self.output_dir, exist_ok=True)
         
-        # 更新所有视频客户端的工作目录配置
-        for vc_name in self.video_client.video_clients:
-            if isinstance(self.video_client.video_clients[vc_name], dict):
-                self.video_client.video_clients[vc_name]['cfg']['work_dir'] = self.output_dir
-            else:
-                self.video_client.video_clients[vc_name].work_dir = self.output_dir
-        
-        for vc_name in self.video_client.common_video_clients:
-            if isinstance(self.video_client.common_video_clients[vc_name], dict):
-                self.video_client.common_video_clients[vc_name]['cfg']['work_dir'] = self.output_dir
-            else:
-                self.video_client.common_video_clients[vc_name].work_dir = self.output_dir
-        
         # 获取视频 URL
         video_url = self.url_input.text().strip()
         if not video_url:
             QMessageBox.warning(self, "警告", "请先解析视频链接")
             return
         
-        self.log_message(f"正在启动 CLI 下载窗口...")
+        self.log_message(f"正在下载视频...")
         self.log_message(f"下载目录: {self.output_dir}")
         
-        # 使用子进程启动 CLI 下载
-        import subprocess
-        import sys
-        
-        # 构造 CLI 命令 - 使用 videodl 命令
-        cli_command = [
-            'videodl',
-            '-i', video_url,
-            '-c', f'{{"work_dir": "{self.output_dir}"}}'
-        ]
-        
+        # 使用 Python 模块直接调用下载功能
         try:
-            # 启动 CLI 子进程 - 不重定向输出，让信息显示在新控制台窗口
-            self.download_process = subprocess.Popen(
-                cli_command,
-                creationflags=subprocess.CREATE_NEW_CONSOLE if os.name == 'nt' else 0
-            )
+            # 为每个视频信息创建下载线程
+            for i, video_info in enumerate(self.current_video_infos):
+                self.log_message(f"开始下载第 {i+1} 个视频: {video_info.get('title', '未知标题')}")
+                
+                # 直接调用下载方法
+                self.video_client.download(video_infos=[video_info], output_dir=self.output_dir)
+                
+                self.log_message(f"✓ 第 {i+1} 个视频下载完成")
             
-            # 等待一小段时间，检查进程是否正常启动
-            import time
-            time.sleep(2)
-            
-            # 检查进程是否还在运行
-            if self.download_process.poll() is not None:
-                # 进程已经退出
-                self.log_message(f"✗ CLI 启动失败，进程已退出 (退出码: {self.download_process.returncode})")
-                QMessageBox.critical(self, "错误", f"CLI 启动失败，进程已退出\n请检查视频链接是否正确")
-                return
-            
-            self.log_message("✓ CLI 下载窗口已启动")
-            self.log_message("提示: 关闭 CLI 窗口即可取消下载")
+            self.log_message("✓ 所有视频下载完成！")
             
             # 显示提示信息
             QMessageBox.information(
-                self, 
-                "下载已启动", 
-                f"CLI 下载窗口已启动\n\n"
-                f"下载目录: {self.output_dir}\n\n"
-                f"提示: 关闭 CLI 窗口即可取消下载"
+                self,
+                "下载完成",
+                f"所有视频已成功下载\n\n"
+                f"保存目录: {self.output_dir}"
             )
             
         except Exception as e:
-            self.log_message(f"✗ 启动 CLI 失败: {str(e)}")
-            QMessageBox.critical(self, "错误", f"启动 CLI 下载失败: {str(e)}")
+            self.log_message(f"✗ 下载失败: {str(e)}")
+            QMessageBox.critical(self, "错误", f"下载视频失败: {str(e)}")
 
 
 def main():
