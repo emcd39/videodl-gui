@@ -9,6 +9,8 @@ on:
 jobs:
   build-and-release:
     runs-on: windows-latest  # 使用 Windows 环境打包 Windows exe
+    permissions:
+      contents: write  # 允许创建和更新发布
     
     steps:
       - name: Checkout code
