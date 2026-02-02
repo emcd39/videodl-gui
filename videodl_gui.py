@@ -241,20 +241,16 @@ class VideoDLGUI:
             url = self.resolve_short_url(url)
 
             self.log(f"最终链接: {url}", 'info')
+            self.log(f"保存目录: {download_dir}", 'info')
             self.log("=" * 50, 'info')
 
             # 构建命令
             cmd = [self.exe_path, '-i', url]
 
-            if download_dir:
-                import json
-                config = {"work_dir": download_dir}
-                cmd.extend(['-c', json.dumps(config, ensure_ascii=False)])
-
             self.log(f"开始下载...\n", 'info')
 
-            # 执行下载
-            process = subprocess.Popen(cmd)
+            # 执行下载（在指定目录下运行）
+            process = subprocess.Popen(cmd, cwd=download_dir)
             return_code = process.wait()
 
             if return_code == 0:
