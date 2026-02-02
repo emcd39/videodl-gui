@@ -72,17 +72,22 @@ jobs:
         path: release/videodl_gui.zip
         retention-days: 30
 
+    - name: Get release date
+      id: date
+      run: |
+        echo "date=$(Get-Date -Format 'yyyy.MM.dd')" >> $env:GITHUB_OUTPUT
+
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
         tag_name: latest
-        name: videodl Windows ${{ github.run_number }}
+        name: videodl Windows ${{ steps.date.outputs.date }}
         body: |
           ## videodl Windows 自动构建
 
+          **版本**: ${{ steps.date.outputs.date }}
           **构建时间**: ${{ github.event.head_commit.timestamp }}
           **提交信息**: ${{ github.event.head_commit.message }}
-          **构建编号**: ${{ github.run_number }}
 
           ## 下载说明
 
@@ -102,5 +107,6 @@ jobs:
           上游项目: https://github.com/CharlesPikachu/videodl
         draft: false
         prerelease: false
+        files: release/videodl_gui.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
