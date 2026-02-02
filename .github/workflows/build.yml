@@ -1,0 +1,88 @@
+name: Build videodl Windows EXE
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - '.github/**'
+      - 'custom_files/**'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout upstream repository
+      uses: actions/checkout@v4
+      with:
+        repository: CharlesPikachu/videodl
+        fetch-depth: 0
+
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller
+
+    - name: Copy custom files
+      run: |
+        # 复制自定义文件
+        Copy-Item -Path "custom_files/main.py" -Destination "main.py" -Force
+        Copy-Item -Path "custom_files/build_exe.spec" -Destination "build_exe.spec" -Force
+        Copy-Item -Path "custom_files/build_gui_exe.spec" -Destination "build_gui_exe.spec" -Force
+        Copy-Item -Path "custom_files/videodl_gui.py" -Destination "videodl_gui.py" -Force
+
+    - name: Install project dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Build videodl.exe
+      run: |
+        pyinstaller --clean build_exe.spec --workpath=./build --distpath=./dist -y
+
+    - name: Build videodl_gui.exe
+      run: |
+        pyinstaller --clean build_gui_exe.spec --workpath=./build_gui --distpath=./dist_gui -y
+
+    - name: Copy videodl.exe to GUI directory
+      run: |
+        Copy-Item -Path "dist/videodl.exe" -Destination "dist_gui/videodl_gui/videodl.exe" -Force
+
+    - name: Package release files
+      run: |
+        # 创建发布目录
+        New-Item -ItemType Directory -Path "release" -Force
+
+        # 打包 GUI 目录（包含 videodl.exe）
+        Compress-Archive -Path "dist_gui/videodl_gui/*" -DestinationPath "release/videodl_gui.zip"
+
+        # 单独打包 videodl.exe
+        Copy-Item -Path "dist/videodl.exe" -Destination "release/videodl.exe"
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: videodl-windows
+        path: |
+          release/videodl.exe
+          release/videodl_gui.zip
+        retention-days: 30
+
+    - name: Create Release (if tagged)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          release/videodl.exe
+          release/videodl_gui.zip
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
