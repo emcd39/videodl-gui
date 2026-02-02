@@ -12,23 +12,14 @@ from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 # 收集所有数据文件
 datas = []
 datas += collect_data_files('videodl')
-
-# 动态获取 rich 的 Unicode 数据文件路径
-try:
-    rich_unicode_path = os.path.join(site.getsitepackages()[0], 'rich/_unicode_data')
-    if os.path.exists(rich_unicode_path):
-        for file in os.listdir(rich_unicode_path):
-            if file.endswith('.py') and not file.startswith('__'):
-                datas.append((os.path.join(rich_unicode_path, file), 'rich/_unicode_data'))
-except:
-    pass  # 如果找不到，跳过手动添加
-
+datas += collect_data_files('rich')  # rich 的所有数据文件（包括 unicode 数据）
 datas += collect_data_files('playwright')  # playwright 驱动文件
 datas += collect_data_files('curl_cffi')  # curl_cffi 数据文件
 
 # 隐藏导入（可能需要动态导入的模块）
 hiddenimports = []
 hiddenimports += collect_submodules('videodl')
+hiddenimports += collect_submodules('rich')  # rich 的所有子模块
 hiddenimports += ['click', 'rich', 'prettytable', 'json_repair', 'pathvalidate']
 hiddenimports += ['platformdirs', 'emoji', 'bleach', 'beautifulsoup4', 'parsel', 'tqdm']
 hiddenimports += ['pycryptodomex', 'pycryptodome', 'cryptography', 'tldextract', 'fake_useragent']
