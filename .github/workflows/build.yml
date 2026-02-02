@@ -1,5 +1,8 @@
 name: Build videodl Windows EXE
 
+permissions:
+  contents: write
+
 on:
   push:
     branches: [ main, master ]
@@ -99,6 +102,5 @@ jobs:
           上游项目: https://github.com/CharlesPikachu/videodl
         draft: false
         prerelease: false
-        overwrite: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
