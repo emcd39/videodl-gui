@@ -58,24 +58,19 @@ jobs:
       run: |
         New-Item -ItemType Directory -Path "release" -Force
         Compress-Archive -Path "dist_gui/videodl_gui/*" -DestinationPath "release/videodl_gui.zip"
-        Copy-Item -Path "dist/videodl.exe" -Destination "release/videodl.exe"
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: videodl-windows
-        path: |
-          release/videodl.exe
-          release/videodl_gui.zip
+        path: release/videodl_gui.zip
         retention-days: 30
 
     - name: Create Release (if tagged)
       if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
-        files: |
-          release/videodl.exe
-          release/videodl_gui.zip
+        files: release/videodl_gui.zip
         draft: false
         prerelease: false
       env:
