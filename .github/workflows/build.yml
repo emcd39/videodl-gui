@@ -3,9 +3,6 @@ name: Build videodl Windows EXE
 on:
   push:
     branches: [ main, master ]
-    paths:
-      - '.github/**'
-      - 'custom_files/**'
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
@@ -15,11 +12,21 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout upstream repository
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Checkout upstream videodl
       uses: actions/checkout@v4
       with:
         repository: CharlesPikachu/videodl
+        path: videodl-upstream
         fetch-depth: 0
+
+    - name: Copy videodl source to workspace
+      run: |
+        Copy-Item -Recurse -Path "videodl-upstream/videodl" -Destination "." -Force
+        Copy-Item -Path "videodl-upstream/requirements.txt" -Destination "." -Force
+        Remove-Item -Recurse -Force "videodl-upstream"
 
     - name: Setup Python
       uses: actions/setup-python@v5
@@ -30,14 +37,6 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install pyinstaller
-
-    - name: Copy custom files
-      run: |
-        # 复制自定义文件
-        Copy-Item -Path "custom_files/main.py" -Destination "main.py" -Force
-        Copy-Item -Path "custom_files/build_exe.spec" -Destination "build_exe.spec" -Force
-        Copy-Item -Path "custom_files/build_gui_exe.spec" -Destination "build_gui_exe.spec" -Force
-        Copy-Item -Path "custom_files/videodl_gui.py" -Destination "videodl_gui.py" -Force
 
     - name: Install project dependencies
       run: |
@@ -57,13 +56,8 @@ jobs:
 
     - name: Package release files
       run: |
-        # 创建发布目录
         New-Item -ItemType Directory -Path "release" -Force
-
-        # 打包 GUI 目录（包含 videodl.exe）
         Compress-Archive -Path "dist_gui/videodl_gui/*" -DestinationPath "release/videodl_gui.zip"
-
-        # 单独打包 videodl.exe
         Copy-Item -Path "dist/videodl.exe" -Destination "release/videodl.exe"
 
     - name: Upload artifacts
