@@ -1,0 +1,47 @@
+'''initialize'''
+from .bv import BVVideoClient
+from .pv import PVVideoClient
+from .ray import RayVideoClient
+from .xzdx import XZDXVideoClient
+from .vget import VgetVideoClient
+from .kit9 import KIT9VideoClient
+from .xmflv import XMFlvVideoClient
+from .gvvip import GVVIPVideoClient
+from .kedou import KedouVideoClient
+from .bugpk import BugPkVideoClient
+from .mizhi import MiZhiVideoClient
+from .xcvts import XCVTSVideoClient
+from .odown import ODwonVideoClient
+from .lvlong import LvlongVideoClient
+from .snapwc import SnapWCVideoClient
+from .nologo import NoLogoVideoClient
+from .im1907 import IM1907VideoClient
+from .iiilab import IIILabVideoClient
+from ..utils import BaseModuleBuilder
+from .videofk import VideoFKVideoClient
+from .longzhu import LongZhuVideoClient
+from .snapany import SnapAnyVideoClient
+from .qingting import QingtingVideoClient
+from .kukutool import KuKuToolVideoClient
+from .senjiexi import SENJiexiVideoClient
+from .zanqianba import ZanqianbaVideoClient
+from .anyfetcher import AnyFetcherVideoClient
+from .qzxdptools import QZXDPToolsVideoClient
+from .xiazaitool import XiazaitoolVideoClient
+
+
+'''CommonVideoClientBuilder'''
+class CommonVideoClientBuilder(BaseModuleBuilder):
+    REGISTERED_MODULES = {
+        'IM1907VideoClient': IM1907VideoClient, 'XMFlvVideoClient': XMFlvVideoClient, 'SnapAnyVideoClient': SnapAnyVideoClient, 'AnyFetcherVideoClient': AnyFetcherVideoClient, 
+        'SENJiexiVideoClient': SENJiexiVideoClient, 'LvlongVideoClient': LvlongVideoClient, 'PVVideoClient': PVVideoClient, 'IIILabVideoClient': IIILabVideoClient, 
+        'VideoFKVideoClient': VideoFKVideoClient, 'VgetVideoClient': VgetVideoClient, 'SnapWCVideoClient': SnapWCVideoClient, 'ODwonVideoClient': ODwonVideoClient, 
+        'RayVideoClient': RayVideoClient, 'KedouVideoClient': KedouVideoClient, 'KuKuToolVideoClient': KuKuToolVideoClient, 'XZDXVideoClient': XZDXVideoClient, 
+        'KIT9VideoClient': KIT9VideoClient, 'QZXDPToolsVideoClient': QZXDPToolsVideoClient, 'MiZhiVideoClient': MiZhiVideoClient, 'BugPkVideoClient': BugPkVideoClient, 
+        'NoLogoVideoClient': NoLogoVideoClient, 'LongZhuVideoClient': LongZhuVideoClient, 'ZanqianbaVideoClient': ZanqianbaVideoClient, 'BVVideoClient': BVVideoClient, 
+        'XiazaitoolVideoClient': XiazaitoolVideoClient, 'QingtingVideoClient': QingtingVideoClient, 'GVVIPVideoClient': GVVIPVideoClient, 'XCVTSVideoClient': XCVTSVideoClient, 
+    }
+
+
+'''BuildCommonVideoClient'''
+BuildCommonVideoClient = CommonVideoClientBuilder().build
