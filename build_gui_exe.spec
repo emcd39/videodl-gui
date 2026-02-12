@@ -11,7 +11,13 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[],
-    hiddenimports=['requests', 'urllib3'],
+    hiddenimports=[
+        'requests', 'urllib3',
+        'bs4',  # beautifulsoup4 的实际导入名称
+        'pycryptodomex', 'pycryptodome', 'cryptography',
+        'pyfreeproxy', 'curl_cffi', 'm3u8',
+        'Crypto', 'Crypto.Cipher', 'Crypto.Random',
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
