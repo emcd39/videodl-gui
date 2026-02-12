@@ -73,8 +73,8 @@ jobs:
         # Build installer using full path (more reliable than PATH refresh)
         & "C:\Program Files (x86)\NSIS\makensis.exe" "install.nsi"
 
-        # Move installer to release folder
-        Move-Item -Path "install.exe" -Destination "release/videodl-setup.exe" -Force
+        # Move installer to release folder (NSIS generates videodl-setup-*.exe)
+        Move-Item -Path "videodl-setup-*.exe" -Destination "release/videodl-setup.exe" -Force
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
