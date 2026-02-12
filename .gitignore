@@ -116,6 +116,11 @@ Desktop/videodl_outputs/
 # Config files (local)
 Documents/videodl_config.json
 
+# Upstream clone directories (should not be committed)
+videodl-upstream/
+videodl/
+
+
 # Build artifacts
 build/
 build_gui/
