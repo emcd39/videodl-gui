@@ -1,58 +1,70 @@
-# 自定义文件说明
+# videodl GUI - 视频下载工具
 
-此目录包含 videodl 项目的自定义修改文件，用于 GitHub Actions 自动构建。
+基于 [CharlesPikachu/videodl](https://github.com/CharlesPikachu/videodl) 的 Windows GUI 版本。
 
-## 文件列表
+## 下载说明
 
-### 1. main.py
-videodl 的入口文件，用于正确初始化模块路径。
+### 📦 安装包（推荐）
 
-### 2. videodl_gui.py
-tkinter GUI 界面程序，提供友好的图形界面。
+下载 `videodl-setup.exe`，双击安装：
+- 自动安装到 `%USERPROFILE%\AppData\Local\videodl`
+- 自动创建桌面快捷方式 `videodl_gui`
+- 支持卸载
 
-### 3. build_exe.spec
-PyInstaller 配置文件，用于打包 videodl.exe（核心下载程序）。
+### 📁 便携版
 
-### 4. build_gui_exe.spec
-PyInstaller 配置文件，用于打包 videodl_gui.exe（GUI界面）。
+下载 `videodl_gui.zip`，解压后直接运行 `videodl_gui.exe`
 
-## 准备步骤
+## 功能特性
 
-在推送到 GitHub 之前，需要将以下文件复制到此目录：
+- ✅ 图形化界面，操作简单
+- ✅ 支持多个视频平台
+- ✅ 自动解析短链接
+- ✅ 自定义下载目录
+- ✅ 实时下载日志
+
+## 系统要求
+
+- Windows 10 或更高版本
+
+## 开发构建
+
+### 文件说明
+
+| 文件 | 说明 |
+|------|------|
+| `main.py` | videodl 入口文件 |
+| `videodl_gui.py` | tkinter GUI 界面 |
+| `build_exe.spec` | PyInstaller 配置（核心程序） |
+| `build_gui_exe.spec` | PyInstaller 配置（GUI） |
+| `install.nsi` | NSIS 安装包脚本 |
+
+### 本地构建
 
 ```bash
-# 从项目根目录复制文件到 custom_files 目录
-cp main.py custom_files/
-cp videodl_gui.py custom_files/
-cp build_exe.spec custom_files/
-cp build_gui_exe.spec custom_files/
+# 克隆上游仓库并复制源代码
+git clone --depth=1 https://github.com/CharlesPikachu/videodl.git videodl-upstream
+cp -r videodl-upstream/videodl .
+cp videodl-upstream/requirements.txt .
+
+# 安装依赖
+pip install -r requirements.txt pyinstaller
+
+# 构建 exe
+pyinstaller --clean build_exe.spec --workpath=./build --distpath=./dist -y
+pyinstaller --clean build_gui_exe.spec --workpath=./build_gui --distpath=./dist_gui -y
+
+# 复制核心程序到 GUI 目录
+cp dist/videodl.exe dist_gui/videodl_gui/
+
+# 构建安装包（需要安装 NSIS）
+makensis install.nsi
 ```
 
-## 注意事项
+## 许可证
 
-⚠️ **重要**: build_exe.spec 中包含用户特定的路径，需要在构建前动态修改。
+MIT License
 
-修改 build_exe.spec 中的这一行：
-```python
-rich_unicode_path = 'C:/Users/EMCD/AppData/Local/Programs/Python/Python312/Lib/site-packages/rich/_unicode_data'
-```
+---
 
-改为动态路径：
-```python
-import site
-rich_unicode_path = os.path.join(site.getsitepackages()[0], 'rich/_unicode_data')
-```
-
-## GitHub Actions 工作流程
-
-1. 克隆上游仓库 (CharlesPikachu/videodl)
-2. 复制 custom_files 中的文件到仓库根目录
-3. 安装依赖
-4. 构建 videodl.exe
-5. 构建 videodl_gui.exe
-6. 打包并上传构建产物
-
-## 输出文件
-
-- `videodl.exe` - 核心命令行下载程序
-- `videodl_gui.zip` - GUI 界面程序（包含 videodl.exe）
+上游项目: https://github.com/CharlesPikachu/videodl
