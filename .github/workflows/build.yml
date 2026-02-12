@@ -70,14 +70,11 @@ jobs:
         # Install NSIS using chocolatey (pre-installed on GitHub Actions Windows runners)
         choco install nsis -y
 
-        # Refresh environment variables
-        $env:PATH = [System.Environment]::GetEnvironmentVariable("Path","User") + ";" + [System.Environment]::GetEnvironmentVariable("Path","Machine")
-
-        # Build installer
-        makensis "install.nsi"
+        # Build installer using full path (more reliable than PATH refresh)
+        & "C:\Program Files (x86)\NSIS\makensis.exe" "install.nsi"
 
         # Move installer to release folder
-        Move-Item -Path "videodl-setup.exe" -Destination "release/videodl-setup.exe" -Force
+        Move-Item -Path "install.exe" -Destination "release/videodl-setup.exe" -Force
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
