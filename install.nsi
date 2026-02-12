@@ -1,6 +1,4 @@
-; NSIS Modern UI Installer Script for videodl
-; 安装目录: %USERPROFILE%\AppData\Local\videodl
-; 桌面快捷方式: videodl_gui
+﻿; 桌面快捷方式: videodl_gui
 
 !define PRODUCT_NAME "videodl"
 !define PRODUCT_VERSION "0.6.2"
@@ -20,9 +18,22 @@ RequestExecutionLevel user
 
 ; Include Modern UI
 !include "MUI2.nsh"
+!include "WinMessages.nsh"
 
 ; Interface Settings
 !define MUI_ABORTWARNING
+
+; Welcome Page Custom Text (define before MUI_PAGE_WELCOME)
+!define MUI_WELCOMEPAGE_TITLE "$(WELCOME_TITLE)"
+!define MUI_WELCOMEPAGE_TEXT "$(WELCOME_TEXT)"
+
+; Installer Name
+Name "videodl"
+OutFile "videodl-setup-${PRODUCT_VERSION}.exe"
+
+; Window Caption and Branding
+Caption "videodl v${PRODUCT_VERSION} Setup"
+BrandingText "https://github.com/emcd39/videodl-gui"
 
 ; Pages
 !insertmacro MUI_PAGE_WELCOME
@@ -39,6 +50,13 @@ RequestExecutionLevel user
 ; Languages
 !insertmacro MUI_LANGUAGE "SimpChinese"
 !insertmacro MUI_LANGUAGE "English"
+
+; Language Strings (must come after MUI_LANGUAGE)
+LangString WELCOME_TITLE ${LANG_SIMPCHINESE} "欢迎使用 videodl"
+LangString WELCOME_TITLE ${LANG_ENGLISH} "Welcome to videodl"
+
+LangString WELCOME_TEXT ${LANG_SIMPCHINESE} "欢迎使用 videodl 视频下载工具安装向导。$\r$\n$\r$\n本程序将在您的计算机上安装 videodl 视频下载工具。$\r$\n点击下一步继续。"
+LangString WELCOME_TEXT ${LANG_ENGLISH} "Welcome to the videodl Setup Wizard.$\r$\n$\r$\nThis program will install videodl on your computer.$\r$\nClick Next to continue."
 
 ; Installer Sections
 Section "videodl" SecMain
@@ -95,6 +113,14 @@ Function .onInit
 
   ; Set the installation directory
   StrCpy $INSTDIR "${PRODUCT_INSTALL_DIR}"
+
+  ; Set window title based on language
+  StrCmp $LANGUAGE 2052 0 caption_en  ; Simplified Chinese (2052)
+    SendMessage $HWNDPARENT ${WM_SETTEXT} 0 "STR:videodl 视频下载工具 v${PRODUCT_VERSION} 安装程序"
+  caption_en:
+  StrCmp $LANGUAGE 1033 0 caption_done  ; English (1033)
+    SendMessage $HWNDPARENT ${WM_SETTEXT} 0 "STR:videodl v${PRODUCT_VERSION} Setup"
+  caption_done:
 
 FunctionEnd
 
