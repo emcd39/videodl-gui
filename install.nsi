@@ -6,7 +6,7 @@
 !define PRODUCT_VERSION "0.6.2"
 !define PRODUCT_PUBLISHER "videodl"
 !define PRODUCT_WEB_SITE "https://github.com/emcd39/videodl-gui"
-!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\videodl_gui.exe"
+!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\videodl_gui.exe"
 
 ; Set the installation directory to $LOCALAPPDATA\videodl
 !define PRODUCT_INSTALL_DIR "$LOCALAPPDATA\${PRODUCT_NAME}"
@@ -61,9 +61,9 @@ Section "videodl" SecMain
   WriteUninstaller "${PRODUCT_INSTALL_DIR}\uninstall.exe"
 
   ; Write registry keys for Add/Remove Programs
-  WriteRegStr SHCTX "${PRODUCT_DIR_REGKEY}" "" "${PRODUCT_INSTALL_DIR}\videodl_gui.exe"
-   WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "DisplayName" "videodl"
-   WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "DisplayVersion" "${PRODUCT_VERSION}"
+   WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\videodl_gui.exe" "" "${PRODUCT_INSTALL_DIR}\videodl_gui.exe"
+   WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\videodl" "DisplayName" "videodl"
+    WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\videodl" "DisplayVersion" "${PRODUCT_VERSION}"
    WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "DisplayName" "videodl"
   WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "Publisher" "${PRODUCT_PUBLISHER}"
   WriteRegStr SHCTX "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}" "URLInfoAbout" "${PRODUCT_WEB_SITE}"
