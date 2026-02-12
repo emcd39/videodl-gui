@@ -21,9 +21,9 @@ hiddenimports = []
 hiddenimports += collect_submodules('videodl')
 hiddenimports += collect_submodules('rich')  # rich 的所有子模块
 hiddenimports += ['click', 'rich', 'prettytable', 'json_repair', 'pathvalidate']
-hiddenimports += ['platformdirs', 'emoji', 'bleach', 'beautifulsoup4', 'parsel', 'tqdm']
-hiddenimports += ['pycryptodomex', 'pycryptodome', 'cryptography', 'tldextract', 'fake_useragent']
-hiddenimports += ['pyfreeproxy', 'playwright', 'questionary', 'pywidevine', 'curl_cffi', 'm3u8']
+hiddenimports += ['platformdirs', 'emoji', 'bleach', 'bs4', 'parsel', 'tqdm']  # beautifulsoup4 -> bs4
+hiddenimports += ['cryptography', 'tldextract', 'fake_useragent']  # removed pycryptodomex, pycryptodome (covered by Crypto)
+hiddenimports += ['playwright', 'questionary', 'pywidevine', 'curl_cffi', 'm3u8']  # removed pyfreeproxy (optional dependency)
 hiddenimports += ['Crypto', 'Crypto.Cipher', 'Crypto.Random']
 hiddenimports += ['nodejs_wheel']
 

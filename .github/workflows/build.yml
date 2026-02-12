@@ -67,17 +67,14 @@ jobs:
 
     - name: Build NSIS installer
       run: |
-        # Download and install NSIS
-        $nsisUrl = "https://sourceforge.net/projects/nsis/files/NSIS%203/3.09/nsis-3.09-setup.exe/download"
-        $nsisInstaller = "$env:TEMP\nsis-setup.exe"
-        Invoke-WebRequest -Uri $nsisUrl -OutFile $nsisInstaller
-        Start-Process -FilePath $nsisInstaller -ArgumentList "/S /D=C:\NSIS" -Wait
+        # Install NSIS using chocolatey (pre-installed on GitHub Actions Windows runners)
+        choco install nsis -y
 
-        # Add NSIS to PATH
-        $env:PATH = "C:\NSIS;$env:PATH"
+        # Refresh environment variables
+        $env:PATH = [System.Environment]::GetEnvironmentVariable("Path","User") + ";" + [System.Environment]::GetEnvironmentVariable("Path","Machine")
 
         # Build installer
-        & "C:\NSIS\makensis.exe" "install.nsi"
+        makensis "install.nsi"
 
         # Move installer to release folder
         Move-Item -Path "videodl-setup.exe" -Destination "release/videodl-setup.exe" -Force
