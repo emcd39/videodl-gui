@@ -121,3 +121,4 @@ build/
 build_gui/
 *.exe
 
+.claude/
