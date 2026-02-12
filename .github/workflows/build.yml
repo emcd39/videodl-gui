@@ -65,11 +65,30 @@ jobs:
         New-Item -ItemType Directory -Path "release" -Force
         Compress-Archive -Path "dist_gui/videodl_gui/*" -DestinationPath "release/videodl_gui.zip"
 
+    - name: Build NSIS installer
+      run: |
+        # Download and install NSIS
+        $nsisUrl = "https://sourceforge.net/projects/nsis/files/NSIS%203/3.09/nsis-3.09-setup.exe/download"
+        $nsisInstaller = "$env:TEMP\nsis-setup.exe"
+        Invoke-WebRequest -Uri $nsisUrl -OutFile $nsisInstaller
+        Start-Process -FilePath $nsisInstaller -ArgumentList "/S /D=C:\NSIS" -Wait
+
+        # Add NSIS to PATH
+        $env:PATH = "C:\NSIS;$env:PATH"
+
+        # Build installer
+        & "C:\NSIS\makensis.exe" "install.nsi"
+
+        # Move installer to release folder
+        Move-Item -Path "videodl-setup.exe" -Destination "release/videodl-setup.exe" -Force
+
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
         name: videodl-windows
-        path: release/videodl_gui.zip
+        path: |
+          release/videodl_gui.zip
+          release/videodl-setup.exe
         retention-days: 30
 
     - name: Get release date
@@ -91,13 +110,29 @@ jobs:
 
           ## 下载说明
 
-          下载 `videodl_gui.zip` 并解压即可使用。
+          **推荐**: 下载 `videodl-setup.exe` 安装程序，双击安装即可。
+          **便携版**: 下载 `videodl_gui.zip` 并解压即可使用。
 
           ## 包含文件
+
+          ### 安装包 (videodl-setup.exe)
+          - 自动安装到 `%USERPROFILE%\AppData\Local\videodl`
+          - 自动创建桌面快捷方式 `videodl_gui`
+          - 支持卸载
+
+          ### 便携版 (videodl_gui.zip)
           - `videodl_gui.exe` - GUI 界面程序
           - `videodl.exe` - 核心下载程序
 
           ## 使用方法
+
+          ### 安装包
+          1. 下载 `videodl_setup.exe`
+          2. 双击运行，按提示完成安装
+          3. 桌面会出现 `videodl_gui` 快捷方式
+          4. 双击快捷方式启动程序
+
+          ### 便携版
           1. 解压 `videodl_gui.zip`
           2. 运行 `videodl_gui.exe`
           3. 输入视频链接，选择保存目录
@@ -107,6 +142,8 @@ jobs:
           上游项目: https://github.com/CharlesPikachu/videodl
         draft: false
         prerelease: false
-        files: release/videodl_gui.zip
+        files: |
+          release/videodl_gui.zip
+          release/videodl-setup.exe
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
